@@ -18,7 +18,7 @@ double lastX = 250.0;
 double lastY = 250.0;
 bool firstMouse = true;
 float cameraSpeed = 0.05f;
-vec3 cameraPos = vec3(0.0f, 0.0f, 5.0f);
+vec3 cameraPos = vec3(0.0f, 15.0f, 5.0f);
 
 float timeOfDay = 0.0f; 
 float dayDuration = 10.0f;
@@ -170,8 +170,8 @@ vector<float> generateSphereVertices(float radius, int sectorCount, int stackCou
     vector<float> vertices;
     for (int i = 0; i <= stackCount; ++i) {
         float stackAngle = M_PI / 2 - i * M_PI / stackCount; 
-        float xy = radius * cosf(stackAngle);
-        float z = radius * sinf(stackAngle); 
+        float xy = radius * cosf(stackAngle) * 2.0f; // Увеличиваем радиус в два раза
+        float z = radius * sinf(stackAngle) * 2.0f; // Увеличиваем радиус в два раза
         for (int j = 0; j <= sectorCount; ++j) {
             float sectorAngle = j * 2 * M_PI / sectorCount; 
             float x = xy * cosf(sectorAngle); 
@@ -179,7 +179,6 @@ vector<float> generateSphereVertices(float radius, int sectorCount, int stackCou
             vertices.push_back(x);
             vertices.push_back(y);
             vertices.push_back(z);
-            
             float s = (float)j / sectorCount;
             float t = (float)i / stackCount; 
             vertices.push_back(s);
@@ -191,47 +190,42 @@ vector<float> generateSphereVertices(float radius, int sectorCount, int stackCou
 
 vector<float> generateCubeVertices() {
     return {
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-         0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+        -1.0f, -1.0f,  1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
+         1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f,  1.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
+         1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
+         1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
+        -1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
+         1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
+         1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
+         1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f,  1.0f, -1.0f, 0.0f, 0.0f,
+         1.0f,  1.0f, -1.0f, 1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
+         1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
+        -1.0f,  1.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 1.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 1.0f, 1.0f,
+        -1.0f, -1.0f,  1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
     };
 }
 
@@ -243,6 +237,17 @@ vector<float> generatePlaneVertices() {
          50.0f, 0.0f,  50.0f, 1.0f, 1.0f,
         -50.0f, 0.0f,  50.0f, 0.0f, 1.0f,
         -50.0f, 0.0f, -50.0f, 0.0f, 0.0f,
+    };
+}
+
+vector<float> generateSecondPlaneVertices() {
+    return {
+        -10.0f, 13.0f, -10.0f, 0.0f, 0.0f,
+         10.0f, 13.0f, -10.0f, 1.0f, 0.0f,
+         10.0f, 13.0f,  10.0f, 1.0f, 1.0f,
+         10.0f, 13.0f,  10.0f, 1.0f, 1.0f,
+        -10.0f, 13.0f,  10.0f, 0.0f, 1.0f,
+        -10.0f, 13.0f, -10.0f, 0.0f, 0.0f,
     };
 }
 
@@ -325,29 +330,24 @@ GLuint loadTexture(const char* path) {
 
 vector<float> generatePyramidVertices() {
     return {
-        
-        -0.5f, 0.0f, -0.5f, 0.0f, 0.0f,
-         0.5f, 0.0f, -0.5f, 1.0f, 0.0f,
-         0.5f, 0.0f,  0.5f, 1.0f, 1.0f,
-         0.5f, 0.0f,  0.5f, 1.0f, 1.0f,
-        -0.5f, 0.0f,  0.5f, 0.0f, 1.0f,
-        -0.5f, 0.0f, -0.5f, 0.0f, 0.0f,
-
-        -0.5f, 0.0f, -0.5f, 0.0f, 0.0f,
-         0.5f, 0.0f, -0.5f, 1.0f, 0.0f,
+        -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+         1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+         1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
+         1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
+        -1.0f, 0.0f,  1.0f, 0.0f, 1.0f,
+        -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+         1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
          0.0f, 1.0f, 0.0f, 0.5f, 1.0f,
-
-         0.5f, 0.0f, -0.5f, 1.0f, 0.0f,
-         0.5f, 0.0f,  0.5f, 1.0f, 1.0f,
+         1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+         1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
          0.0f, 1.0f, 0.0f, 0.5f, 1.0f,
-
-         0.5f, 0.0f,  0.5f, 1.0f, 1.0f,
-        -0.5f, 0.0f,  0.5f, 0.0f, 1.0f,
+         1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
+        -1.0f, 0.0f,  1.0f, 0.0f, 1.0f,
          0.0f, 1.0f, 0.0f, 0.5f, 1.0f,
-
-        -0.5f, 0.0f,  0.5f, 0.0f, 1.0f,
-        -0.5f, 0.0f, -0.5f, 0.0f, 0.0f,
-         0.0f, 1.0f, 0.0f, 0.5f, 1.0f  
+        -1.0f, 0.0f,  1.0f, 0.0f, 1.0f,
+        -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+         0.0f, 1.0f, 0.0f, 0.5f, 1.0f 
     };
 }
 
@@ -403,7 +403,7 @@ int main() {
         Shader shaderSolid(vertex_shader_source, fragment_shader_source_solid);
         Shader shaderTexture(vertex_shader_source, fragment_shader_source_texture);
         GLuint transformLoc = glGetUniformLocation(shaderSolid.getProgram(), "transform");
-        GLuint texture = loadTexture("/home/ualdrm/Studies/KR/metal.jpeg");
+        GLuint texture = loadTexture("/home/ualdrm/Studies/KR/rock.jpg");
         GLuint floorTexture = loadTexture("/home/ualdrm/Studies/KR/water.jpg"); 
         GLuint wallTexture = loadTexture("/home/ualdrm/Studies/KR/cosmos.jpg");
         GLuint topTexture = loadTexture("/home/ualdrm/Studies/KR/cosm.jpg"); 
@@ -420,6 +420,9 @@ int main() {
         vector<float> ceilingVertices = generateCeilingVertices();
         ShapeRenderer ceilingRenderer(ceilingVertices);
 
+        vector<float> secondFloorVertices = generateSecondPlaneVertices();
+        ShapeRenderer secondFloorRenderer(secondFloorVertices);
+
         while (!glfwWindowShouldClose(window)) {
             timeOfDay += (1.0f / 60.0f);
             if (timeOfDay > (dayDuration + nightDuration)) {
@@ -428,8 +431,8 @@ int main() {
 
             vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
             vec3 lightPos = vec3(5.0f * cos(timeOfDay * 2.0f * M_PI / (dayDuration + nightDuration)), 
-                      5.0f * sin(timeOfDay * 2.0f * M_PI / (dayDuration + nightDuration)), 
-                      0.0f);
+                                5.0f * sin(timeOfDay * 2.0f * M_PI / (dayDuration + nightDuration)), 
+                                0.0f);
             if (timeOfDay < dayDuration) {
                 float intensity = timeOfDay / dayDuration; 
                 lightColor *= intensity; 
@@ -460,19 +463,24 @@ int main() {
             front = normalize(front);
             view = lookAt(cameraPos, cameraPos + front, vec3(0, 1, 0));
             glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(projection * view * model));
+
             mat4 floorModel = translate(mat4(1.0f), vec3(0.0f, -1.0f, 0.0f));
             glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * floorModel));
             planeRenderer.render(shaderTexture, floorTexture, planeVertices.size() / 5);
+
+            mat4 secondfloorModel =mat4(1.0f);
+            glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * floorModel));
+            secondFloorRenderer.render(shaderTexture, floorTexture, planeVertices.size() / 5);
             
-            mat4 sphereModel = translate(mat4(1.0f), vec3(0, -0.3, 0)); 
+            mat4 sphereModel = translate(mat4(1.0f), vec3(0, 12.5, 0)); 
             glUniformMatrix4fv(glGetUniformLocation(shaderSolid.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * sphereModel));
             sphereRenderer.render(shaderSolid, 0, sphereVertices.size() / 5);
 
-            mat4 cubeModel = translate(mat4(1.0f), vec3(2, 0, 0)); 
+            mat4 cubeModel = translate(mat4(1.0f), vec3(5, 13, 0)); 
             glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * cubeModel));
             cubeRenderer.render(shaderTexture, texture, cubeVertices.size() / 5);
 
-            mat4 pyramidModel = translate(mat4(1.0f), vec3(-2.0f, -0.8f, 0.0f));
+            mat4 pyramidModel = translate(mat4(1.0f), vec3(-5.0f, 12, 0.0f));
             glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * pyramidModel));
             pyramidRenderer.render(shaderTexture, texture, 18);
 

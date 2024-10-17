@@ -166,26 +166,53 @@ private:
     GLuint vao, vbo;
 };
 
-vector<float> generateSphereVertices(float radius, int sectorCount, int stackCount) {
-    vector<float> vertices;
+
+GLuint createSphere(float radius, int sectorCount, int stackCount, std::vector<float>& vertices) {
     for (int i = 0; i <= stackCount; ++i) {
-        float stackAngle = M_PI / 2 - i * M_PI / stackCount; 
-        float xy = radius * cosf(stackAngle) * 2.0f; // Увеличиваем радиус в два раза
-        float z = radius * sinf(stackAngle) * 2.0f; // Увеличиваем радиус в два раза
+        float stackAngle = M_PI / 2 - i * M_PI / stackCount; // от 90 до -90
+        float xy = radius * cosf(stackAngle); // радиус на текущем уровне
+        float z = radius * sinf(stackAngle); // высота
+
         for (int j = 0; j <= sectorCount; ++j) {
-            float sectorAngle = j * 2 * M_PI / sectorCount; 
-            float x = xy * cosf(sectorAngle); 
-            float y = xy * sinf(sectorAngle); 
+            float sectorAngle = j * 2 * M_PI / sectorCount; // угол текущего сектора
+            float x = xy * cosf(sectorAngle); // координата x
+            float y = xy * sinf(sectorAngle); // координата y
+
+            // Добавляем вершины и текстурные координаты
             vertices.push_back(x);
             vertices.push_back(y);
             vertices.push_back(z);
-            float s = (float)j / sectorCount;
-            float t = (float)i / stackCount; 
+            float s = (float)j / sectorCount; // текстурная координата s
+            float t = (float)i / stackCount; // текстурная координата t
             vertices.push_back(s);
             vertices.push_back(t);
         }
     }
-    return vertices;
+
+    GLuint vao, vbo;
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    return vao; // возвращаем VAO для рендеринга
+}
+
+void renderSphere(GLuint vao, int vertexCount, Shader& shader, GLuint texture) {
+    shader.use();
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 }
 
 vector<float> generateCubeVertices() {
@@ -331,23 +358,23 @@ GLuint loadTexture(const char* path) {
 vector<float> generatePyramidVertices() {
     return {
         -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-         1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+         1.0f, 0.0f, -1.0f, 1.0f, 1.0f,
          1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
          1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
-        -1.0f, 0.0f,  1.0f, 0.0f, 1.0f,
+        -1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
         -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
         -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
          1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-         0.0f, 1.0f, 0.0f, 0.5f, 1.0f,
+         0.0f, 3.0f, 0.0f, 0.5f, 1.0f,
          1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
          1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
-         0.0f, 1.0f, 0.0f, 0.5f, 1.0f,
+         0.0f, 3.0f, 0.0f, 0.5f, 1.0f,
          1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
         -1.0f, 0.0f,  1.0f, 0.0f, 1.0f,
-         0.0f, 1.0f, 0.0f, 0.5f, 1.0f,
+         0.0f, 3.0f, 0.0f, 0.5f, 1.0f,
         -1.0f, 0.0f,  1.0f, 0.0f, 1.0f,
         -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-         0.0f, 1.0f, 0.0f, 0.5f, 1.0f 
+         0.0f, 3.0f, 0.0f, 0.5f, 1.0f 
     };
 }
 
@@ -394,19 +421,21 @@ int main() {
             throw runtime_error("Glew error");
         }
 
-        float radius = 1.0f;
+        float radius = 1.5f;
         int sectorCount = 36;
-        int stackCount = 18;
-        vector<float> sphereVertices = generateSphereVertices(radius, sectorCount, stackCount);
-        ShapeRenderer sphereRenderer(sphereVertices);
+        int stackCount = 1000;
+        vector<float> sphereVertices;
+        GLuint sphereVAO = createSphere(radius, sectorCount, stackCount, sphereVertices);
 
         Shader shaderSolid(vertex_shader_source, fragment_shader_source_solid);
         Shader shaderTexture(vertex_shader_source, fragment_shader_source_texture);
         GLuint transformLoc = glGetUniformLocation(shaderSolid.getProgram(), "transform");
-        GLuint texture = loadTexture("/home/ualdrm/Studies/KR/rock.jpg");
-        GLuint floorTexture = loadTexture("/home/ualdrm/Studies/KR/water.jpg"); 
+        GLuint textureSphere = loadTexture("/home/ualdrm/Studies/KR/sphere.jpg");
+        GLuint textureSquare = loadTexture("/home/ualdrm/Studies/KR/cube.jpg");
+        GLuint texturePyramide = loadTexture("/home/ualdrm/Studies/KR/pyramide.jpg");
+        GLuint floorTexture = loadTexture("/home/ualdrm/Studies/KR/123.jpg"); 
         GLuint wallTexture = loadTexture("/home/ualdrm/Studies/KR/cosmos.jpg");
-        GLuint topTexture = loadTexture("/home/ualdrm/Studies/KR/cosm.jpg"); 
+        GLuint topTexture = loadTexture("/home/ualdrm/Studies/KR/ex.jpg"); 
         vector<float> planeVertices = generatePlaneVertices();
         ShapeRenderer planeRenderer(planeVertices);
         ShapeRenderer pyramidRenderer(generatePyramidVertices());
@@ -466,23 +495,23 @@ int main() {
 
             mat4 floorModel = translate(mat4(1.0f), vec3(0.0f, -1.0f, 0.0f));
             glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * floorModel));
-            planeRenderer.render(shaderTexture, floorTexture, planeVertices.size() / 5);
+            planeRenderer.render(shaderTexture, topTexture, planeVertices.size() / 5);
 
             mat4 secondfloorModel =mat4(1.0f);
             glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * floorModel));
             secondFloorRenderer.render(shaderTexture, floorTexture, planeVertices.size() / 5);
             
-            mat4 sphereModel = translate(mat4(1.0f), vec3(0, 12.5, 0)); 
+            mat4 sphereModel = translate(mat4(1.0f), vec3(0, 13.5, 0)); 
             glUniformMatrix4fv(glGetUniformLocation(shaderSolid.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * sphereModel));
-            sphereRenderer.render(shaderSolid, 0, sphereVertices.size() / 5);
+            renderSphere(sphereVAO, sphereVertices.size() / 5, shaderTexture, textureSphere);
 
-            mat4 cubeModel = translate(mat4(1.0f), vec3(5, 13, 0)); 
+            mat4 cubeModel = translate(mat4(1.0f), vec3(5, 13.2, 0)); 
             glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * cubeModel));
-            cubeRenderer.render(shaderTexture, texture, cubeVertices.size() / 5);
+            cubeRenderer.render(shaderTexture, textureSquare, cubeVertices.size() / 5);
 
-            mat4 pyramidModel = translate(mat4(1.0f), vec3(-5.0f, 12, 0.0f));
+            mat4 pyramidModel = translate(mat4(1.0f), vec3(-5.0f, 12.2f, 0.0f)) * rotate(mat4(1.0f), radians(180.0f), vec3(0, 1, 0));
             glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * pyramidModel));
-            pyramidRenderer.render(shaderTexture, texture, 18);
+            pyramidRenderer.render(shaderTexture, texturePyramide, 18);
 
             mat4 wallModel = mat4(1.0f);
             glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * wallModel));

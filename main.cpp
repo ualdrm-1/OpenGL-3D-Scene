@@ -22,7 +22,10 @@ vec3 cameraPos = vec3(0.0f, 15.0f, 5.0f);
 
 float timeOfDay = 0.0f; 
 float dayDuration = 10.0f;
-float nightDuration = 10.0f; 
+float nightDuration = 10.0f;
+
+vec3 spherePosition = vec3(0.0f, 13.5f, 0.0f); 
+float sphereRotationAngle = 0.0f;
 
 const char* vertex_shader_source = R"(
     #version 330 core
@@ -169,21 +172,20 @@ private:
 
 GLuint createSphere(float radius, int sectorCount, int stackCount, std::vector<float>& vertices) {
     for (int i = 0; i <= stackCount; ++i) {
-        float stackAngle = M_PI / 2 - i * M_PI / stackCount; // от 90 до -90
-        float xy = radius * cosf(stackAngle); // радиус на текущем уровне
-        float z = radius * sinf(stackAngle); // высота
+        float stackAngle = M_PI / 2 - i * M_PI / stackCount;
+        float xy = radius * cosf(stackAngle);
+        float z = radius * sinf(stackAngle);
 
         for (int j = 0; j <= sectorCount; ++j) {
-            float sectorAngle = j * 2 * M_PI / sectorCount; // угол текущего сектора
-            float x = xy * cosf(sectorAngle); // координата x
-            float y = xy * sinf(sectorAngle); // координата y
+            float sectorAngle = j * 2 * M_PI / sectorCount; 
+            float x = xy * cosf(sectorAngle); 
+            float y = xy * sinf(sectorAngle); 
 
-            // Добавляем вершины и текстурные координаты
             vertices.push_back(x);
             vertices.push_back(y);
             vertices.push_back(z);
-            float s = (float)j / sectorCount; // текстурная координата s
-            float t = (float)i / stackCount; // текстурная координата t
+            float s = (float)j / sectorCount;
+            float t = (float)i / stackCount; 
             vertices.push_back(s);
             vertices.push_back(t);
         }
@@ -205,7 +207,7 @@ GLuint createSphere(float radius, int sectorCount, int stackCount, std::vector<f
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    return vao; // возвращаем VAO для рендеринга
+    return vao;
 }
 
 void renderSphere(GLuint vao, int vertexCount, Shader& shader, GLuint texture) {
@@ -384,10 +386,10 @@ void processInput(GLFWwindow *window) {
     front.y = sin(radians(alfa));
     front.z = sin(radians(zalfa)) * cos(radians(alfa));
     front = normalize(front);
-
     vec3 right = normalize(cross(front, vec3(0.0f, 1.0f, 0.0f))); 
     vec3 up = normalize(cross(right, front)); 
 
+    // Управление камерой
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += front * cameraSpeed; 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -396,6 +398,20 @@ void processInput(GLFWwindow *window) {
         cameraPos -= right * cameraSpeed; 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += right * cameraSpeed; 
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        spherePosition += front * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        spherePosition -= front * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        spherePosition -= right * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        spherePosition += right * cameraSpeed;
+
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        sphereRotationAngle += 1.0f;
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        sphereRotationAngle -= 1.0f;
 }
 
 int main() {
@@ -501,7 +517,7 @@ int main() {
             glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * floorModel));
             secondFloorRenderer.render(shaderTexture, floorTexture, planeVertices.size() / 5);
             
-            mat4 sphereModel = translate(mat4(1.0f), vec3(0, 13.5, 0)); 
+            mat4 sphereModel = translate(mat4(1.0f), spherePosition) * rotate(mat4(1.0f), radians(sphereRotationAngle), vec3(0.0f, 1.0f, 0.0f));
             glUniformMatrix4fv(glGetUniformLocation(shaderSolid.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * sphereModel));
             renderSphere(sphereVAO, sphereVertices.size() / 5, shaderTexture, textureSphere);
 

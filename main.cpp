@@ -43,7 +43,7 @@ const char* fragment_shader_source_solid = R"(
     #version 330 core
     out vec4 fragColor;
     void main() {
-        fragColor = vec4(1.0, 1.0, 1.0, 1.0); // Белый цвет
+        fragColor = vec4(1.0, 1.0, 1.0, 1.0);
     }
 )";
 
@@ -52,11 +52,11 @@ const char* fragment_shader_source_texture = R"(
     out vec4 fragColor;
     in vec2 TexCoord;
     uniform sampler2D texture1;
-    uniform vec3 lightColor; // Цвет света
-    uniform vec3 lightPos; // Позиция света
+    uniform vec3 lightColor;
+    uniform vec3 lightPos; 
     void main() {
         vec4 texColor = texture(texture1, TexCoord);
-        fragColor = texColor * vec4(lightColor, 1.0); // Умножаем цвет текстуры на цвет света
+        fragColor = texColor * vec4(lightColor, 1.0);
     }
 )";
 
@@ -361,8 +361,8 @@ GLuint loadTexture(const char* path) {
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
-        cerr << "Не удалось загрузить текстуру: " << path << endl;
-        cerr << "stbi_load ошибка: " << stbi_failure_reason() << endl;
+        cerr << "error with download texture: " << path << endl;
+        cerr << "stbi_load err: " << stbi_failure_reason() << endl;
         return 0;
     }
 
@@ -438,7 +438,7 @@ int main() {
 
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-        GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "KR", monitor, nullptr);
+        GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "3D-Scene", monitor, nullptr);
 
         if (!window) {
             glfwTerminate();
@@ -465,12 +465,12 @@ int main() {
 
         GLuint transformLoc = glGetUniformLocation(shaderSolid.getProgram(), "transform");
 
-        GLuint textureSphere = loadTexture("/home/ualdrm/Studies/KR/sphere.jpg");
-        GLuint textureSquare = loadTexture("/home/ualdrm/Studies/KR/cube.jpg");
-        GLuint texturePyramide = loadTexture("/home/ualdrm/Studies/KR/pyramide.jpg");
-        GLuint floorTexture = loadTexture("/home/ualdrm/Studies/KR/123.jpg"); 
-        GLuint wallTexture = loadTexture("/home/ualdrm/Studies/KR/cosmos.jpg");
-        GLuint topTexture = loadTexture("/home/ualdrm/Studies/KR/ex.jpg");
+        GLuint textureSphere = loadTexture("texture/sphere.jpg");
+        GLuint textureSquare = loadTexture("texture/cube.jpg");
+        GLuint texturePyramide = loadTexture("texture/pyramid.jpg");
+        GLuint floorTexture = loadTexture("texture/second_floor.jpg"); 
+        GLuint wallTexture = loadTexture("texture/wall.jpg");
+        GLuint topTexture = loadTexture("texture/floor+ceiling.jpg");
 
         vector<float> planeVertices = generatePlaneVertices();
         ShapeRenderer planeRenderer(planeVertices);

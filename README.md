@@ -32,3 +32,8 @@ There are 3 classes in the code:
 3. `Sphere` - Same as ShapeRenderer, but for a sphere.
 
 Textures are located in the folder of the same name
+
+## SPHERE ANIMATION MOVING:
+WASD - move the sphere, Q/E - rotate the sphere;
+
+![sphere-gif](image/sphere.gif)

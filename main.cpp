@@ -169,53 +169,66 @@ private:
     GLuint vao, vbo;
 };
 
-
-GLuint createSphere(float radius, int sectorCount, int stackCount, std::vector<float>& vertices) {
-    for (int i = 0; i <= stackCount; ++i) {
-        float stackAngle = M_PI / 2 - i * M_PI / stackCount;
-        float xy = radius * cosf(stackAngle);
-        float z = radius * sinf(stackAngle);
-
-        for (int j = 0; j <= sectorCount; ++j) {
-            float sectorAngle = j * 2 * M_PI / sectorCount; 
-            float x = xy * cosf(sectorAngle); 
-            float y = xy * sinf(sectorAngle); 
-
-            vertices.push_back(x);
-            vertices.push_back(y);
-            vertices.push_back(z);
-            float s = (float)j / sectorCount;
-            float t = (float)i / stackCount; 
-            vertices.push_back(s);
-            vertices.push_back(t);
-        }
+class Sphere {
+public:
+    Sphere(float radius, int sectorCount, int stackCount) {
+        createSphere(radius, sectorCount, stackCount);
     }
 
-    GLuint vao, vbo;
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+    void render(Shader& shader, GLuint texture) {
+        shader.use();
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindVertexArray(vao);
+        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    }
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    GLuint getVAO() const {
+        return vao;
+    }
 
-    return vao;
-}
+    int getVertexCount() const {
+        return vertexCount;
+    }
 
-void renderSphere(GLuint vao, int vertexCount, Shader& shader, GLuint texture) {
-    shader.use();
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-}
+private:
+    GLuint vao;
+    int vertexCount;
+
+    void createSphere(float radius, int sectorCount, int stackCount) {
+        vector<float> vertices;
+        for (int i = 0; i <= stackCount; ++i) {
+            float stackAngle = M_PI / 2 - i * M_PI / stackCount;
+            float xy = radius * cosf(stackAngle);
+            float z = radius * sinf(stackAngle);
+            for (int j = 0; j <= sectorCount; ++j) {
+                float sectorAngle = j * 2 * M_PI / sectorCount;
+                float x = xy * cosf(sectorAngle);
+                float y = xy * sinf(sectorAngle);
+                vertices.push_back(x);
+                vertices.push_back(y);
+                vertices.push_back(z);
+                float s = (float)j / sectorCount;
+                float t = (float)i / stackCount;
+                vertices.push_back(s);
+                vertices.push_back(t);
+            }
+        }
+
+        vertexCount = (sectorCount + 1) * (stackCount + 1);
+        glGenVertexArrays(1, &vao);
+        GLuint vbo;
+        glGenBuffers(1, &vbo);
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+};
 
 vector<float> generateCubeVertices() {
     return {
@@ -435,8 +448,6 @@ int main() {
         glfwSetCursorPosCallback(window, mouse_callback);
         glfwSetKeyCallback(window, key_callback);
 
-        
-        
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         if (glewInit() != GLEW_OK) {
@@ -447,10 +458,11 @@ int main() {
         int sectorCount = 36;
         int stackCount = 1000;
         vector<float> sphereVertices;
-        GLuint sphereVAO = createSphere(radius, sectorCount, stackCount, sphereVertices);
+        Sphere sphere(radius, sectorCount, stackCount); 
 
         Shader shaderSolid(vertex_shader_source, fragment_shader_source_solid);
         Shader shaderTexture(vertex_shader_source, fragment_shader_source_texture);
+
         GLuint transformLoc = glGetUniformLocation(shaderSolid.getProgram(), "transform");
 
         GLuint textureSphere = loadTexture("/home/ualdrm/Studies/KR/sphere.jpg");
@@ -528,8 +540,8 @@ int main() {
             secondFloorRenderer.render(shaderTexture, floorTexture, planeVertices.size() / 5);
             
             mat4 sphereModel = translate(mat4(1.0f), spherePosition) * rotate(mat4(1.0f), radians(sphereRotationAngle), vec3(0.0f, 1.0f, 0.0f));
-            glUniformMatrix4fv(glGetUniformLocation(shaderSolid.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * sphereModel));
-            renderSphere(sphereVAO, sphereVertices.size() / 5, shaderTexture, textureSphere);
+            glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * sphereModel));
+            sphere.render(shaderTexture, textureSphere);
 
             mat4 cubeModel = translate(mat4(1.0f), vec3(5, 13.2, 0)); 
             glUniformMatrix4fv(glGetUniformLocation(shaderTexture.getProgram(), "transform"), 1, GL_FALSE, value_ptr(projection * view * cubeModel));

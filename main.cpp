@@ -452,12 +452,14 @@ int main() {
         Shader shaderSolid(vertex_shader_source, fragment_shader_source_solid);
         Shader shaderTexture(vertex_shader_source, fragment_shader_source_texture);
         GLuint transformLoc = glGetUniformLocation(shaderSolid.getProgram(), "transform");
+
         GLuint textureSphere = loadTexture("/home/ualdrm/Studies/KR/sphere.jpg");
         GLuint textureSquare = loadTexture("/home/ualdrm/Studies/KR/cube.jpg");
         GLuint texturePyramide = loadTexture("/home/ualdrm/Studies/KR/pyramide.jpg");
         GLuint floorTexture = loadTexture("/home/ualdrm/Studies/KR/123.jpg"); 
         GLuint wallTexture = loadTexture("/home/ualdrm/Studies/KR/cosmos.jpg");
-        GLuint topTexture = loadTexture("/home/ualdrm/Studies/KR/ex.jpg"); 
+        GLuint topTexture = loadTexture("/home/ualdrm/Studies/KR/ex.jpg");
+
         vector<float> planeVertices = generatePlaneVertices();
         ShapeRenderer planeRenderer(planeVertices);
         ShapeRenderer pyramidRenderer(generatePyramidVertices());

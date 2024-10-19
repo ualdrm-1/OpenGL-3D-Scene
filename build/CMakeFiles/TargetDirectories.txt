@@ -1,0 +1,3 @@
+/home/ualdrm/Studies/KR/build/CMakeFiles/kr.dir
+/home/ualdrm/Studies/KR/build/CMakeFiles/edit_cache.dir
+/home/ualdrm/Studies/KR/build/CMakeFiles/rebuild_cache.dir

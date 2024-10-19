@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/ualdrm/Studies/KR/build",
+  "command": "/usr/bin/c++   -g -o CMakeFiles/kr.dir/main.cpp.o -c /home/ualdrm/Studies/KR/main.cpp",
+  "file": "/home/ualdrm/Studies/KR/main.cpp",
+  "output": "CMakeFiles/kr.dir/main.cpp.o"
+}
+]

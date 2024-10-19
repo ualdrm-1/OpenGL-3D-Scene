@@ -389,7 +389,6 @@ void processInput(GLFWwindow *window) {
     vec3 right = normalize(cross(front, vec3(0.0f, 1.0f, 0.0f))); 
     vec3 up = normalize(cross(right, front)); 
 
-    // Управление камерой
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += front * cameraSpeed; 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -422,7 +421,12 @@ int main() {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        GLFWwindow* window = glfwCreateWindow(800, 600, "GRAPH-3", nullptr, nullptr);
+        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "KR", monitor, nullptr);
+
         if (!window) {
             glfwTerminate();
             throw runtime_error("Window create error");
@@ -430,6 +434,8 @@ int main() {
         glfwMakeContextCurrent(window);
         glfwSetCursorPosCallback(window, mouse_callback);
         glfwSetKeyCallback(window, key_callback);
+
+        
         
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -498,10 +504,12 @@ int main() {
             planeRenderer.render(shaderTexture, floorTexture, planeVertices.size() / 5);
 
             mat4 transformMatrix = mat4(1.0f);
-            mat4 projection = perspective(radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-             model = translate(transformMatrix, vec3(0, 0, 0));
+            int width, height;
+            glfwGetFramebufferSize(window, &width, &height);
+            mat4 projection = perspective(radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+            model = translate(transformMatrix, vec3(0, 0, 0));
             mat4 view;
-            vec3 front;
+            vec3 front; 
             front.x = cos(radians(zalfa)) * cos(radians(alfa));
             front.y = sin(radians(alfa));
             front.z = sin(radians(zalfa)) * cos(radians(alfa));
